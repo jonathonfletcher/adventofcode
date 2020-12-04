@@ -17,7 +17,6 @@ fn main() {
         }
     }
 
-    println!("{:?}", vec);
     while let Some(x) = vec.pop() {
         for y in vec.iter() {
             if x + y == 2020 {
