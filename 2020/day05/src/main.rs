@@ -40,10 +40,10 @@ fn main() {
         Err(error) => panic!("{}", error)
     };
 
-    for y in (0..127) {
+    for _ in 0..127 {
         grid.push(vec![0, 0, 0, 0, 0, 0, 0, 0]);
     }
-    println!("{:?}", grid);
+    // println!("{:?}", grid);
 
     let mut max_score = 0;
     for line in io::BufReader::new(file).lines() {
@@ -60,17 +60,22 @@ fn main() {
     }
     println!("max_score: {}", max_score);
     let mut passed_front = false;
-    for y in (0..grid.len()) {
+    let mut done = false;
+    for y in 0..grid.len() {
         let mut row_count = 0;
-        for x in (0..8) {
+        for x in 0..8 {
             if grid[y][x] == 0 {
                 if passed_front {
-                    println!("{}", y*8+x);
+                    println!("score for empty seat: {}", y*8+x);
+                    done = true;
                     break;
                 }
             } else {
                 row_count += 1;
             }
+        }
+        if done {
+            break;
         }
         if !passed_front {
             if row_count == 8 {
