@@ -1,31 +1,40 @@
+use std::collections::{HashMap, HashSet};
 use std::fs::File;
-use std::io::{self, Error, BufRead};
+use std::io::{self, BufRead, Error};
+
+const AOCDEBUG: bool = false;
 
 type AOCResult = std::result::Result<(), Error>;
 
+#[derive(Hash, Eq, PartialEq, Debug)]
+struct BagCounter {
+    bag_type: String,
+    bag_count: usize,
+}
+
 struct AOCProcessor {
     input: String,
-    sum_part1: i32,
-    sum_part2: i32,
-    current_entry: Vec<i32>,
-    current_nlines: i32,
+    bag_nesting_map: HashMap<String, Vec<String>>,
+    bag_container_map: HashMap<String, Vec<BagCounter>>,
+    result_a: usize,
+    result_b: usize,
 }
 
 impl AOCProcessor {
     pub fn new(input: String) -> AOCProcessor {
         AOCProcessor {
             input,
-            sum_part1: 0,
-            sum_part2: 0,
-            current_entry: vec![0; 26],
-            current_nlines: 0,
+            bag_nesting_map: HashMap::new(),
+            bag_container_map: HashMap::new(),
+            result_a: 0,
+            result_b: 0,
         }
     }
 
     pub fn process(&mut self) -> AOCResult {
         let file = match File::open(&self.input) {
             Ok(file) => file,
-            Err(error) => return Err(error)
+            Err(error) => return Err(error),
         };
 
         self.initialize();
@@ -40,56 +49,143 @@ impl AOCProcessor {
     }
 
     pub fn initialize(&mut self) {
-        self.sum_part1 = 0;
-        self.sum_part2 = 0;
-        self.current_entry = vec![0; 26];
-        self.current_nlines = 0;
+        self.bag_nesting_map.clear();
+        self.bag_container_map.clear();
     }
 
     fn process_line(&mut self, line: &str) {
-        fn char_to_index(c: char) -> i32 {
-            c as i32 - 'a' as i32
-        }
+        let mut parse_stack: Vec<String> = Vec::new();
 
         if line.len() > 0 {
-            self.current_nlines += 1;
-            for c in line.chars() {
-                let idx = char_to_index(c) as usize;
-                self.current_entry[idx] += 1;
+            if AOCDEBUG {
+                println!("{:?}", line);
             }
-        } else {
-            let v_p1: i32 = self
-                .current_entry
-                .iter()
-                .map(|i| if *i > 0 { 1 } else { 0 })
-                .sum();
-            let v_p2: i32 = self
-                .current_entry
-                .iter()
-                .map(|i| if *i == self.current_nlines { 1 } else { 0 })
-                .sum();
-            self.sum_part1 += v_p1;
-            self.sum_part2 += v_p2;
-            self.current_entry = vec![0; 26];
-            self.current_nlines = 0;
+
+            let tokens: Vec<&str> = line.split_ascii_whitespace().collect();
+            let mut skip = false;
+            let mut outside_bag_type: String = String::from("");
+            for t in tokens {
+                if skip {
+                    break;
+                }
+                if t.eq("no") {
+                    skip = true;
+                } else if t.eq("contain") {
+                    let _ = parse_stack.pop().unwrap();
+                    let bag_color = parse_stack.pop().unwrap();
+                    let bag_adjective = parse_stack.pop().unwrap();
+
+                    outside_bag_type = format!("{} {}", bag_adjective, bag_color);
+
+                    self.bag_container_map
+                        .insert(outside_bag_type.clone(), Vec::new());
+                } else if t.eq("bag,") || t.eq("bags,") || t.eq("bag.") || t.eq("bags.") {
+                    let bag_color = parse_stack.pop().unwrap();
+                    let bag_adjective = parse_stack.pop().unwrap();
+                    let bag_count = parse_stack.pop().unwrap();
+
+                    let bag_type = format!("{} {}", bag_adjective, bag_color);
+                    let bag_count = bag_count.parse::<usize>().unwrap();
+
+                    if !self.bag_nesting_map.contains_key(&bag_type.clone()) {
+                        self.bag_nesting_map.insert(bag_type.clone(), Vec::new());
+                    }
+                    if let Some(x) = self.bag_nesting_map.get_mut(&bag_type.clone()) {
+                        x.push(outside_bag_type.clone());
+                    }
+
+                    if let Some(x) = self.bag_container_map.get_mut(&outside_bag_type) {
+                        x.push(BagCounter {
+                            bag_type,
+                            bag_count,
+                        });
+                    }
+                } else {
+                    parse_stack.push(String::from(t));
+                }
+            }
         }
     }
 
     pub fn finalize(&mut self) {
-        if self.current_nlines > 0 {
-            let v_p1: i32 = self
-                .current_entry
-                .iter()
-                .map(|i| if *i > 0 { 1 } else { 0 })
-                .sum();
-            let v_p2: i32 = self
-                .current_entry
-                .iter()
-                .map(|i| if *i == self.current_nlines { 1 } else { 0 })
-                .sum();
-            self.sum_part1 += v_p1;
-            self.sum_part2 += v_p2;
+        self.finalize_a();
+        self.finalize_b();
+    }
+
+    fn finalize_a(&mut self) {
+        fn f(
+            searchlist: &Vec<String>,
+            map: &HashMap<String, Vec<String>>,
+            ignoreset: &mut HashSet<String>,
+            indent: usize,
+        ) -> usize {
+            let mut count = 0;
+            for e in searchlist.iter() {
+                if !ignoreset.contains(e) {
+                    ignoreset.insert(e.clone());
+                    count += 1;
+
+                    if let Some(x) = map.get(e) {
+                        if AOCDEBUG {
+                            let mut indent_string = String::from("");
+                            for _ in 0..=indent {
+                                indent_string.push(' ');
+                            }
+                            println!("{}e:{:?} -> x[{}]:{:?}", indent_string, e, x.len(), x);
+                        }
+                        count += f(x, map, ignoreset, indent + 1);
+                    }
+                }
+            }
+            count
         }
+
+        let mut searchlist: Vec<String> = Vec::new();
+        let mut ignoreset: HashSet<String> = HashSet::new();
+
+        searchlist.push(String::from("shiny gold"));
+
+        let count = f(&searchlist, &self.bag_nesting_map, &mut ignoreset, 0);
+        if AOCDEBUG {
+            println!("count:{}", count);
+            println!("ignoreset.len:{}", ignoreset.len());
+        }
+        if ignoreset.len() > 0 {
+            self.result_a = ignoreset.len() - 1;
+        }
+    }
+
+    fn finalize_b(&mut self) {
+        fn f(
+            searchstring: &String,
+            map: &HashMap<String, Vec<BagCounter>>,
+            indent: usize,
+        ) -> usize {
+            let mut count = 0;
+            if let Some(contents) = map.get(searchstring) {
+                if AOCDEBUG {
+                    let mut indent_string = String::from("");
+                    for _ in 0..=indent {
+                        indent_string.push(' ');
+                    }
+                    println!(
+                        "{}{:?} -> [{}]:{:?}",
+                        indent_string,
+                        searchstring,
+                        contents.len(),
+                        contents
+                    );
+                }
+
+                for e in contents.iter() {
+                    count += e.bag_count + e.bag_count * f(&e.bag_type, map, indent + 1);
+                }
+            }
+            count
+        }
+
+        let searchstring: String = String::from("shiny gold");
+        self.result_b = f(&searchstring, &self.bag_container_map, 0);
     }
 }
 
@@ -98,8 +194,9 @@ fn main() {
 
     match p.process() {
         Ok(()) => {
-            println!("sum_part1={}", p.sum_part1);
-            println!("sum_part2={}", p.sum_part2);
+            println!("result_a: {}", p.result_a);
+            println!("result_b: {}", p.result_b);
+            println!("DONE");
         }
         Err(error) => {
             panic!("{:#?}", error);
