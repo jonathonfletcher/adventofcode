@@ -1,3 +1,4 @@
+#[macro_use] extern crate lazy_static;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::{self, BufRead};
@@ -18,8 +19,10 @@ fn is_valid(entry: &HashMap<String, String>) -> bool
         };
         let value_valid = match *field {
             "byr" => {
-                let re = Regex::new(r"^(\d{4})$").unwrap();
-                let rval = match re.captures(value) {
+                lazy_static! {
+                    static ref BYR_RE: Regex = Regex::new(r"^(\d{4})$").unwrap();                
+                }
+                let rval = match BYR_RE.captures(value) {
                     Some(cap) => {
                         let v = cap[1].parse::<i32>().unwrap();
                         cap.len() == 2 && v >= 1902 && v <= 2002
@@ -29,8 +32,10 @@ fn is_valid(entry: &HashMap<String, String>) -> bool
                 rval
             },
             "iyr" => {
-                let re = Regex::new(r"^(\d{4})$").unwrap();
-                let rval = match re.captures(value) {
+                lazy_static! {
+                    static ref IYR_RE: Regex = Regex::new(r"^(\d{4})$").unwrap();                
+                }
+                let rval = match IYR_RE.captures(value) {
                     Some(cap) => {
                         let v = cap[1].parse::<i32>().unwrap();
                         cap.len() == 2 && v >= 2010 && v <= 2020
@@ -40,8 +45,10 @@ fn is_valid(entry: &HashMap<String, String>) -> bool
                 rval
             },
             "eyr" => {
-                let re = Regex::new(r"^(\d{4})$").unwrap();
-                let rval = match re.captures(value) {
+                lazy_static! {
+                    static ref EYR_RE: Regex = Regex::new(r"^(\d{4})$").unwrap();
+                }
+                let rval = match EYR_RE.captures(value) {
                     Some(cap) => {
                         let v = cap[1].parse::<i32>().unwrap();
                         cap.len() == 2 && v >= 2020 && v <= 2030
@@ -51,8 +58,10 @@ fn is_valid(entry: &HashMap<String, String>) -> bool
                 rval
             },
             "hgt" => {
-                let re = Regex::new(r"^(\d+)(cm|in)$").unwrap();
-                let rval = match re.captures(value) {
+                lazy_static! {
+                    static ref HGT_RE: Regex = Regex::new(r"^(\d+)(cm|in)$").unwrap();
+                }
+                let rval = match HGT_RE.captures(value) {
                     Some(cap) => {
                         let v = cap[1].parse::<i32>().unwrap();
                         let scale = &cap[2];
@@ -69,8 +78,10 @@ fn is_valid(entry: &HashMap<String, String>) -> bool
                 rval
             },
             "hcl" => {
-                let re = Regex::new(r"^(\#[0-9a-f]{6})$").unwrap();
-                let rval = match re.captures(value) {
+                lazy_static! {
+                    static ref HCL_RE: Regex = Regex::new(r"^(\#[0-9a-f]{6})$").unwrap();
+                }
+                let rval = match HCL_RE.captures(value) {
                     Some(cap) => {
                         cap.len() == 2
                     },
@@ -90,8 +101,10 @@ fn is_valid(entry: &HashMap<String, String>) -> bool
                 rval
             },
             "pid" => {
-                let re = Regex::new(r"^([0-9]{9})$").unwrap();
-                let rval = match re.captures(value) {
+                lazy_static! {
+                    static ref PID_RE: Regex = Regex::new(r"^([0-9]{9})$").unwrap();
+                }
+                let rval = match PID_RE.captures(value) {
                     Some(cap) => {
                         cap.len() == 2
                     },
