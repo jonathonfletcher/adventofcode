@@ -106,13 +106,6 @@ impl AOCProcessor {
         cache.insert(inputs[1], 1);
 
         for idx in 2..inputs.len() {
-            if AOCDEBUG {
-                println!("idx:{}, len:{}", idx, cache.len());
-                for e in cache.iter() {
-                    println!("{:?}", e);
-                }
-            }
-
             let mut new_cache: HashMap<i32, i64> = HashMap::new();
 
             let vi = inputs[idx];
@@ -130,7 +123,7 @@ impl AOCProcessor {
 
             cache = new_cache;
             if AOCDEBUG {
-                println!("idx:{}, len:{}", idx, cache.len());
+                println!("idx:{}, cache:{:?}", idx, cache);
             }
         }
         if AOCDEBUG {
