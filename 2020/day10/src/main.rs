@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+// use std::collections::HashMap;
 use std::fs::File;
 use std::io::{self, BufRead, Error};
 
@@ -101,37 +101,55 @@ impl AOCProcessor {
             println!("{:?}", inputs);
         }
 
-        let mut cache: HashMap<i32, i64> = HashMap::new();
-        cache.insert(inputs[0], 1);
-        cache.insert(inputs[1], 1);
+        let mut totals: Vec<i64> = vec![0; 1+max_v as usize];
+        totals[inputs[0] as usize] = 1;
+        totals[inputs[1] as usize] = 1;
+
+        // let mut cache: HashMap<i32, i64> = HashMap::new();
+        // cache.insert(inputs[0], 1);
+        // cache.insert(inputs[1], 1);
 
         for idx in 2..inputs.len() {
-            let mut new_cache: HashMap<i32, i64> = HashMap::new();
+            let old_totals = totals.clone();
+            totals = vec![0; 1+max_v as usize];
+
+            // let mut new_cache: HashMap<i32, i64> = HashMap::new();
 
             let vi = inputs[idx];
-            let mut nvi = 0;
-            for (k, v) in cache.iter() {
-                let vk = *k;
-                if vi - vk <= 3 {
-                    nvi += *v;
-                    new_cache.insert(vk, *v);
+            for k in 0..max_v {
+                let v = old_totals[k as usize];
+                if v > 0 && vi - k <= 3 {
+                    totals[vi as usize] += v;
+                    totals[k as usize] = v;
                 }
             }
-            if nvi > 0 {
-                new_cache.insert(vi, nvi);
-            }
 
-            cache = new_cache;
+            // let mut nvi = 0;
+            // for (k, v) in cache.iter() {
+            //     let vk = *k;
+            //     if vi - vk <= 3 {
+            //         nvi += *v;
+            //         new_cache.insert(vk, *v);
+            //     }
+            // }
+            // if nvi > 0 {
+            //     new_cache.insert(vi, nvi);
+            // }
+
+            // cache = new_cache;
             if AOCDEBUG {
-                println!("idx:{}, cache:{:?}", idx, cache);
+                // println!("idx:{}, cache:{:?}", idx, cache);
+                println!("idx:{}, totals:{:?}", idx, totals);
             }
         }
         if AOCDEBUG {
-            println!("cache:{:?}", cache);
+            // println!("cache:{:?}", cache);
+            println!("totals:{:?}", totals);
         }
-        if cache.contains_key(&max_v) {
-            self.result_b = *cache.get(&max_v).unwrap();
-        }
+        // if cache.contains_key(&max_v) {
+            // self.result_b = *cache.get(&max_v).unwrap();
+        // }
+        self.result_b = totals[max_v as usize];
 
         println!("result_b:{}", self.result_b);
     }
