@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use std::fs::File;
 use std::io::{self, BufRead, Error};
 
@@ -8,27 +7,27 @@ type AOCResult = std::result::Result<(), Error>;
 
 #[derive(Debug)]
 pub struct AOCGame {
-    memory: HashMap<i32, i32>,
+    memvec: Vec<i32>,
     turn: i32,
 }
 
 impl AOCGame {
     pub fn new() -> AOCGame {
         AOCGame {
-            memory: HashMap::new(),
+            memvec: Vec::new(),
             turn: 0,
         }
     }
     pub fn next(&mut self, n: i32) -> i32 {
         self.turn += 1;
         let mut rval = 0;
-        match self.memory.get(&n) {
-            Some(v) => {
-                rval = self.turn - *v;
-            }
-            None => {}
+        if self.memvec.len() < 1 + n as usize {
+            self.memvec.resize(1 + n as usize, -1);
         }
-        self.memory.insert(n, self.turn);
+        if self.memvec[n as usize] >= 0 {
+            rval = self.turn - self.memvec[n as usize];
+        }
+        self.memvec[n as usize] = self.turn;
         rval
     }
 }
