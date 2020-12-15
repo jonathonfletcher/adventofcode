@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::io::{self, BufRead, Error};
 
-const AOCDEBUG: bool = true;
+const AOCDEBUG: bool = false;
 
 type AOCResult = std::result::Result<(), Error>;
 
@@ -46,7 +46,7 @@ impl AOCProcessor {
 
     pub fn finalize(&mut self) {
         self.finalize_a();
-        // self.finalize_b();
+        self.finalize_b();
     }
 
     fn process_line(&mut self, line: &str) {
@@ -107,6 +107,67 @@ impl AOCProcessor {
     }
 
     fn finalize_b(&mut self) {
+        let mut memory: HashMap<u64, u64> = HashMap::new();
+
+        let mut input_mask: Vec<char> = "000000000000000000000000000000000000".chars().collect();
+        for line in self.input.iter() {
+            let tokens: Vec<&str> = line.split_ascii_whitespace().collect();
+            if tokens[0].eq("mask") {
+                input_mask = tokens[2].chars().collect();
+                let s: String = input_mask.iter().collect();
+                if AOCDEBUG {
+                    println!("new input mask:{}", s);
+                }
+        } else {
+                let mut address = tokens[0][4..tokens[0].len() - 1].parse::<u64>().unwrap();
+                let mut mask_string: Vec<char> = "000000000000000000000000000000000000".chars().collect();
+                let mut mask_vec: Vec<u64> = Vec::new();
+                if AOCDEBUG {
+                    println!(" input address:{:036b}", address);
+                }
+                let value = tokens[2].parse::<u64>().unwrap();
+                for bit in 0..36 {
+                    match input_mask[36 - bit - 1] {
+                        '1' => {
+                            address |= 1<<bit;
+                        },
+                        'X' => {
+                            address &= !(1<<bit);
+                            mask_vec.push(bit as u64);
+                            mask_string[36 - bit - 1] = 'X';
+                        },
+                        _ => {}
+                    }
+                }
+                let s : String = mask_string.iter().collect();
+                if AOCDEBUG {
+                    println!("          mask:{}", s);
+                    println!("masked address:{:036b}", address);
+                    println!("{:?}", mask_vec);
+                }
+                for i in 0..(2 as u64).pow(mask_vec.len() as u32) {
+                    let mut mask_v: u64 = 0;
+                    for j in 0..mask_vec.len() {
+                        if i & 1<<j > 0 {
+                            mask_v |= 1<<mask_vec[j];
+                        }
+
+                    }
+                    if AOCDEBUG {
+                        println!(" iterated mask:{:036b}", mask_v);
+                    }
+                    memory.insert(address | mask_v, value);
+                }
+
+            }
+    
+        }
+        let mut total = 0;
+        for (_, v) in memory.iter() {
+            total += v;
+        }
+        self.result_b = total as i64;
+        println!("result_b:{}", self.result_b);
     }
 }
 
