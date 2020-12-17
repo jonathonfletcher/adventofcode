@@ -2,16 +2,16 @@ use std::collections::HashSet;
 use std::fs::File;
 use std::io::{self, BufRead, Error};
 
-const AOCDEBUG: bool = true;
+const AOCDEBUG: bool = false;
 
 type AOCResult = std::result::Result<(), Error>;
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 struct AOCPoint {
+    pub x: i32,
+    pub y: i32,
     pub z: i32,
     pub w: i32,
-    pub y: i32,
-    pub x: i32,
 }
 
 impl AOCPoint {
@@ -90,14 +90,27 @@ impl AOCProcessor {
         Ok(())
     }
 
-    pub fn initialize(&mut self) {
+    fn initialize(&mut self) {
         self.cells.clear();
+        self.generation = 0;
     }
 
-    pub fn finalize(&mut self) {
+    fn finalize(&mut self) {
         let save_cells = self.cells.clone();
         let save_generation = self.generation;
-        self.print_cube(false);
+        let result_a = self.finalize_a();
+
+        self.cells = save_cells;
+        self.generation = save_generation;
+        let result_b = self.finalize_b();
+        println!("result_a:{}", result_a);
+        println!("result_b:{}", result_b);
+    }
+
+    fn finalize_a(&mut self) -> usize {
+        if AOCDEBUG {
+            self.print_cube(false);
+        }
         while self.generation < 6 {
             self.step(false);
             self.generation += 1;
@@ -107,11 +120,13 @@ impl AOCProcessor {
                 println!("population:{}", self.cells.len());
             }
         }
-        let result_a = self.cells.len();
+        self.cells.len()
+    }
 
-        self.cells = save_cells;
-        self.generation = save_generation;
-        self.print_cube(true);
+    fn finalize_b(&mut self) -> usize {
+        if AOCDEBUG {
+            self.print_cube(true);
+        }
         while self.generation < 6 {
             self.step(true);
             self.generation += 1;
@@ -121,10 +136,7 @@ impl AOCProcessor {
                 println!("population:{}", self.cells.len());
             }
         }
-        let result_b = self.cells.len();
-
-        println!("result_a:{}", result_a);
-        println!("result_b:{}", result_b);
+        self.cells.len()
     }
 
     fn step(&mut self, with_w: bool) {
@@ -165,43 +177,45 @@ impl AOCProcessor {
     }
 
     fn min_point(&self) -> AOCPoint {
-        let min_x = match self.cells.iter().map(|p| p.x).min() {
-            Some(x) => x,
-            None => 0,
-        };
-        let min_y = match self.cells.iter().map(|p| p.y).min() {
-            Some(y) => y,
-            None => 0,
-        };
-        let min_z = match self.cells.iter().map(|p| p.z).min() {
-            Some(z) => z,
-            None => 0,
-        };
-        let min_w = match self.cells.iter().map(|p| p.w).min() {
-            Some(w) => w,
-            None => 0,
-        };
-        AOCPoint::new(min_x, min_y, min_z, min_w)
+        AOCPoint::new(
+            match self.cells.iter().map(|p| p.x).min() {
+                Some(x) => x,
+                None => 0,
+            },
+            match self.cells.iter().map(|p| p.y).min() {
+                Some(y) => y,
+                None => 0,
+            },
+            match self.cells.iter().map(|p| p.z).min() {
+                Some(z) => z,
+                None => 0,
+            },
+            match self.cells.iter().map(|p| p.w).min() {
+                Some(w) => w,
+                None => 0,
+            },
+        )
     }
 
     fn max_point(&self) -> AOCPoint {
-        let max_x = match self.cells.iter().map(|p| p.x).max() {
-            Some(x) => x,
-            None => 0,
-        };
-        let max_y = match self.cells.iter().map(|p| p.y).max() {
-            Some(y) => y,
-            None => 0,
-        };
-        let max_z = match self.cells.iter().map(|p| p.z).max() {
-            Some(z) => z,
-            None => 0,
-        };
-        let max_w = match self.cells.iter().map(|p| p.w).max() {
-            Some(w) => w,
-            None => 0,
-        };
-        AOCPoint::new(max_x, max_y, max_z, max_w)
+        AOCPoint::new(
+            match self.cells.iter().map(|p| p.x).max() {
+                Some(x) => x,
+                None => 0,
+            },
+            match self.cells.iter().map(|p| p.y).max() {
+                Some(y) => y,
+                None => 0,
+            },
+            match self.cells.iter().map(|p| p.z).max() {
+                Some(z) => z,
+                None => 0,
+            },
+            match self.cells.iter().map(|p| p.w).max() {
+                Some(w) => w,
+                None => 0,
+            },
+        )
     }
 
     fn print_cube(&self, with_w: bool) {
