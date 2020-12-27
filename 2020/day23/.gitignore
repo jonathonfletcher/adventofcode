@@ -1,3 +1,7 @@
 target
 *.txt
 
+day23.py
+day23a.c
+day23ll.c
+day23.out
