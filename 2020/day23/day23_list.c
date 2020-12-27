@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 
 
 #define NDROP   (3)
@@ -119,12 +118,13 @@ struct e *one_ptr = find_list(1, head);
 
 
 
-void update_circle_list(struct e *head, struct e *offset, int input_length, int minval, int maxval)
+void update_circle_list(struct e *head, struct e *offset, struct e **value_to_node_array, int minval, int maxval)
 {
 
     struct e *drop_list = offset->next;
     int dc = find_dc_list(offset->v, drop_list, minval, maxval);
-    struct e *dc_list = find_list(dc, drop_list->next->next->next);
+    struct e *dc_list = value_to_node_array[dc];
+    // struct e *dc_list = find_list(dc, drop_list->next->next->next);
     offset->next = drop_list->next->next->next;
     drop_list->next->next->next = dc_list->next;
     dc_list->next = drop_list;
@@ -185,30 +185,26 @@ void run(const char *input_str, int huge)
 {
 const int input_length = huge ? HUGE_SIZE : strlen(input_str);
 struct e *input_list = make_input_list(input_str, input_length);
+struct e **value_to_node_array = calloc(input_length, sizeof(struct e *));
 struct e *offset_ptr = input_list;
 struct e *final_list = input_list;
 int offset = 0;
 int minval, maxval;
 int iterations = huge ? HUGE_ITERATIONS : SMOL_ITERATIONS;
-time_t start_time, current_time;
+
+    for ( int i=0 ; i < input_length ; i++ )
+    {
+        value_to_node_array[input_list[i].v] = &input_list[i];
+    }
 
     minval = 1;
     maxval = input_length;
 
     // printf("%d (%d, %d)\n", input_length, minval, maxval);
 
-    start_time = time(NULL);
     for ( register int j=0 ; j < iterations ; j++ )
     {
-        if (huge && j > 0 && j % 5000 == 0 ) {
-            current_time = time(NULL);
-            printf("%d / %d (%.0f%%)\n", j, iterations, 100.*j/iterations);
-            printf("%lds elapsed / %.0lfs remaining\n",
-                (long)current_time-start_time,
-                (double)((current_time-start_time)/(1.*j/iterations)-(current_time-start_time)));
-        }
-
-        update_circle_list(input_list, offset_ptr, input_length, minval, maxval);
+        update_circle_list(input_list, offset_ptr, value_to_node_array, minval, maxval);
 
         offset_ptr = offset_ptr->next;
     }
@@ -217,14 +213,13 @@ time_t start_time, current_time;
     final_list = find_final_list(input_list, offset_ptr, offset);
 
     if (huge) {
-        current_time = time(NULL);
-        printf("%lds total\n", (long)current_time-start_time);
         printf("%lld\n", final_product_list(final_list));
     } else {
         print_input_list(final_list, offset_ptr);
         print_final_label_list(final_list);
     }
 
+    free(value_to_node_array);
     free(input_list);
 }
 
