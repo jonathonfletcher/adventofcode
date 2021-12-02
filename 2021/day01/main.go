@@ -8,25 +8,28 @@ import (
 )
 
 func part1(scanner *bufio.Scanner) uint64 {
+
 	var prevDepth uint64
-	havePrevDepth := false
+
+	var lineCount = 0
 	var countIncrease uint64 = 0
 
 	for scanner.Scan() {
 		line := scanner.Text()
 		newDepth, _ := strconv.ParseUint(line, 10, 64)
-		if havePrevDepth && newDepth > prevDepth {
+		lineCount++
+
+		if lineCount > 1 && newDepth > prevDepth {
 			countIncrease += 1
 		}
 		prevDepth = newDepth
-		havePrevDepth = true
 		// log.Println(line, newDepth, countIncrease)
 	}
+
 	return countIncrease
 }
 
 func part2(scanner *bufio.Scanner) uint64 {
-	var countIncrease uint64 = 0
 
 	lookBack := 4
 	var valStore = make([]uint64, lookBack)
@@ -35,6 +38,7 @@ func part2(scanner *bufio.Scanner) uint64 {
 	}
 
 	var lineCount = 0
+	var countIncrease uint64 = 0
 
 	for scanner.Scan() {
 		var pSum uint64 = 0
