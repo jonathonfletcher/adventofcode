@@ -34,8 +34,6 @@ func part2(scanner *bufio.Scanner) uint64 {
 		valStore[i] = 0
 	}
 
-	// var prevSum uint64 = 0
-	// var curSum uint64 = 0
 	var lineCount = 0
 
 	for scanner.Scan() {
