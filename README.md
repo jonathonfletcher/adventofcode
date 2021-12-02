@@ -2,9 +2,9 @@
 
 ## Advent of Code 2021
 
-See [Advent of Code 2020](adventofcode.com/2021)
+See [Advent of Code 2021](https://adventofcode.com/2021)
 
-Time to learn [go](www.golang.org)
+Time to learn [go](https://go.dev/)
 
 ## Advent of Code 2020
 
