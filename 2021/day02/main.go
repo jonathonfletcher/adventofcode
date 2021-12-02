@@ -8,36 +8,7 @@ import (
 	"strings"
 )
 
-func part1(scanner *bufio.Scanner) int64 {
-
-	var posX int64 = 0
-	var posY int64 = 0
-	for scanner.Scan() {
-		line := scanner.Text()
-		parts := strings.Split(line, " ")
-		if len(parts) == 2 {
-			var moveDirection string = parts[0]
-			moveSize, _ := strconv.ParseInt(parts[1], 10, 32)
-			switch moveDirection {
-			case "forward":
-				posX += moveSize
-			case "down":
-				posY += moveSize
-			case "up":
-				posY -= moveSize
-			default:
-				log.Fatal(line)
-			}
-		} else {
-			log.Fatal(line)
-		}
-		// log.Println(posX, posY)
-	}
-
-	return posX * posY
-}
-
-func part2(scanner *bufio.Scanner) int64 {
+func day02(scanner *bufio.Scanner, useAim bool) int64 {
 
 	var posX int64 = 0
 	var posY int64 = 0
@@ -48,16 +19,29 @@ func part2(scanner *bufio.Scanner) int64 {
 		if len(parts) == 2 {
 			var moveDirection string = parts[0]
 			moveSize, _ := strconv.ParseInt(parts[1], 10, 32)
-			switch moveDirection {
-			case "forward":
-				posX += moveSize
-				posY += posAim * moveSize
-			case "down":
-				posAim += moveSize
-			case "up":
-				posAim -= moveSize
-			default:
-				log.Fatal(line)
+			if useAim {
+				switch moveDirection {
+				case "forward":
+					posX += moveSize
+					posY += posAim * moveSize
+				case "down":
+					posAim += moveSize
+				case "up":
+					posAim -= moveSize
+				default:
+					log.Fatal(line)
+				}
+			} else {
+				switch moveDirection {
+				case "forward":
+					posX += moveSize
+				case "down":
+					posY += moveSize
+				case "up":
+					posY -= moveSize
+				default:
+					log.Fatal(line)
+				}
 			}
 		} else {
 			log.Fatal(line)
@@ -77,7 +61,7 @@ func main() {
 		} else {
 			scanner := bufio.NewScanner(inFile)
 			scanner.Split(bufio.ScanLines)
-			partAnswer := part1(scanner)
+			partAnswer := day02(scanner, false)
 			log.Println("part1:", partAnswer)
 			inFile.Close()
 		}
@@ -90,7 +74,7 @@ func main() {
 		} else {
 			scanner := bufio.NewScanner(inFile)
 			scanner.Split(bufio.ScanLines)
-			partAnswer := part2(scanner)
+			partAnswer := day02(scanner, true)
 			log.Println("part2:", partAnswer)
 			inFile.Close()
 		}
