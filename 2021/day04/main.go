@@ -158,7 +158,7 @@ func main() {
 		p1 := part1(&numberList, &gridList)
 		log.Println("part1:", p1)
 		p2 := part2(&numberList, &gridList)
-		log.Println("part1:", p2)
+		log.Println("part2:", p2)
 
 	}
 }
