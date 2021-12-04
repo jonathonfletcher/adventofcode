@@ -44,10 +44,10 @@ func (grid *Grid) Call(n int64) bool {
 				rc := true
 				cc := true
 				for i := 0; i < GRIDSIZE; i++ {
-					if !grid.Called[i][y] {
+					if rc && !grid.Called[i][y] {
 						rc = false
 					}
-					if !grid.Called[x][i] {
+					if cc && !grid.Called[x][i] {
 						cc = false
 					}
 				}
@@ -118,7 +118,7 @@ func main() {
 
 		var numberList []int64 = nil
 		var gridList []*Grid = nil
-		var grid *Grid
+		var grid *Grid = nil
 		gridRow := 0
 		scannerState := NUMBERS
 		for scanner.Scan() {
