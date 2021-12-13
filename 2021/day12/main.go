@@ -8,13 +8,14 @@ import (
 )
 
 func WalkOne(cave string, caveSystem map[string][]string, smallCaves map[string]bool, inWalk map[string]int) int {
-	countWalks := 0
-	if cave == "end" {
-		countWalks = 1
-	} else if smallCaves[cave] && inWalk[cave] > 0 {
-		countWalks = 0
+
+	if smallCaves[cave] && inWalk[cave] > 0 {
+		return 0
+	} else if cave == "end" {
+		return 1
 	} else {
 		inWalk[cave]++
+		countWalks := 0
 		for _, cn := range caveSystem[cave] {
 			if cn != "start" {
 				newWalk := make(map[string]int, len(inWalk))
@@ -24,32 +25,22 @@ func WalkOne(cave string, caveSystem map[string][]string, smallCaves map[string]
 				countWalks += WalkOne(cn, caveSystem, smallCaves, newWalk)
 			}
 		}
+		return countWalks
 	}
-	return countWalks
 }
 
 func WalkTwo(cave string, freebieUsed bool, caveSystem map[string][]string, smallCaves map[string]bool, inWalk map[string]int) int {
-	countWalks := 0
 
-	if smallCaves[cave] && inWalk[cave] > 0 {
-		if freebieUsed {
-			countWalks = 0
-		} else {
-			inWalk[cave]++
-			for _, cn := range caveSystem[cave] {
-				if cn != "start" {
-					newWalk := make(map[string]int, len(inWalk))
-					for k, v := range inWalk {
-						newWalk[k] = v
-					}
-					countWalks += WalkTwo(cn, true, caveSystem, smallCaves, newWalk)
-				}
-			}
-		}
+	if freebieUsed && smallCaves[cave] && inWalk[cave] > 0 {
+		return 0
 	} else if cave == "end" {
-		countWalks++
+		return 1
 	} else {
+		if smallCaves[cave] && inWalk[cave] > 0 {
+			freebieUsed = true
+		}
 		inWalk[cave]++
+		countWalks := 0
 		for _, cn := range caveSystem[cave] {
 			if cn != "start" {
 				newWalk := make(map[string]int, len(inWalk))
@@ -59,8 +50,8 @@ func WalkTwo(cave string, freebieUsed bool, caveSystem map[string][]string, smal
 				countWalks += WalkTwo(cn, freebieUsed, caveSystem, smallCaves, newWalk)
 			}
 		}
+		return countWalks
 	}
-	return countWalks
 }
 
 func main() {
