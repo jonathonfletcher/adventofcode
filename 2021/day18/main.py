@@ -10,20 +10,15 @@ def do_explode(l):
         elif e == ']':
             d -= 1
         elif e != ',' and d == 4:
-            # print(l[i:i+3])
             for li in range(i-1, -1, -1):
                 if l[li] not in ['[', ']', ',']:
                     break
             if li > 0:
-                le = l[li]
-                # print(f'l {li:4} {le} {e}')
                 l[li] += l[i]
             for ri in range(i+4, len(l)):
                 if l[ri] not in ['[', ']', ',']:
                     break
             if ri < len(l)-1:
-                re = l[ri]
-                # print(f'l {ri:4} {re} {e}')
                 l[ri] += l[i+2]
             return l[:i-1] + [0] + l[i+4:]
     return None
@@ -41,9 +36,8 @@ def do_split(l):
 
 
 def do_reduce(l):
-    print()    
     while True:
-        print(''.join(map(lambda x: str(x), l)))
+        # print(''.join(map(lambda x: str(x), l)))
         el = do_explode(l)
         if not el:
             el = do_split(l)
@@ -57,21 +51,15 @@ def do_add(lhs, rhs):
 
 
 def do_mag(l):
-    print(''.join(map(lambda x: str(x), l)))
     if len(l) > 1:
         for i in range(len(l)):
             if l[i] not in [ '[', ']',',']:
                 lhs = l[i]
                 rhs = l[i+2]
                 if rhs not in ['[', ']', ',']:
-                    print(f'{i:4}/{len(l)} {lhs} {rhs}')
                     ne = 3 * lhs + 2 * rhs
-
                     ll = l[:i-1]
                     rl = l[i+4:]
-                    # print(f'{type(ll)} {ll}')
-                    # print(f'{type(ne)} {ne}')
-                    # print(f'{type(rl)} {rl}')
                     return do_mag(ll + [ ne ] + rl)
     return l.pop()
 
@@ -86,9 +74,11 @@ def string_to_list(s):
     return l
 
 
-with open('part0.txt') as ifp:
+parts = list()
+with open('part1.txt') as ifp:
     pl = None
     for ins in [l.strip() for l in ifp.readlines()]:
+        parts.append(ins)
         inl = string_to_list(ins)
         if pl is not None:
             inl = do_add(pl, inl)
@@ -97,3 +87,29 @@ with open('part0.txt') as ifp:
     print(do_mag(pl))
 
 
+max_l = None
+max_r = None
+max_m = 0
+
+for li in range(len(parts)):
+    for ri in range(len(parts)):
+        if li == ri:
+            continue
+    
+        ls = string_to_list(parts[li])
+        rs = string_to_list(parts[ri])
+
+        m = do_mag(do_reduce(do_add(ls, rs)))
+        if m > max_m:
+            max_l = parts[li]
+            max_r = parts[ri]
+            max_m = m
+        m = do_mag(do_reduce(do_add(rs, ls)))
+        if m > max_m:
+            max_l = parts[ri]
+            max_r = parts[li]
+            max_m = m
+
+print(f'{max_l}')
+print(f'{max_r}')
+print(f'{max_m}')
