@@ -4,7 +4,7 @@
 
 See [Advent of Code 2021](https://adventofcode.com/2021)
 
-Time to learn [go](https://go.dev/)
+Time to learn [go](https://go.dev/). And .. fallback to [python](https://www.python.org/) when I feel like it ..
 
 ## Advent of Code 2020
 
