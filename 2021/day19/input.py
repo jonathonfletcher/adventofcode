@@ -19,7 +19,10 @@ class Point(object):
         return hash(str(self))
 
     def __eq__(self, other):
-        return self.x == other.x and self.y == other.y and self.z == other.z
+        return ( self.__class__ == other.__class__ 
+            and self.x == other.x
+            and self.y == other.y
+            and self.z == other.z )
 
     def __lt__(self, other):
         return self.x < other.x or self.y < other.y or self.z < other.z

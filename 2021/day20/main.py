@@ -1,74 +1,76 @@
 
 
+class P(object):
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+    def __eq__(self, other):
+        return ( self.__class__ == other.__class__ 
+            and self.x == other.x
+            and self.y == other.y )
+    def __repr__(self):
+        return f'{self.__class__.__name__}({self.x},{self.y})'
+    def __hash__(self):
+        return hash(str(self))
+
+
+def print_image(image):
+    output_mapping = { 0: '.', 1: '#'}
+    img_x = list(set(map(lambda x: x.x, image.keys())))
+    img_y = list(set(map(lambda x: x.y, image.keys())))
+    for y in range(min(img_y), max(img_y)+1):
+        print_line = ""
+        for x in range(min(img_x), max(img_x)+1):
+            print_line += output_mapping.get((image.get(P(x, y), 0)))
+        print(print_line)
+
+
 algo = None
-image = list()
-with open('part0.txt') as ifp:
+image = {}
+input_mapping = { '#': 1, '.': 0 }
+with open('part1.txt') as ifp:
+    y=0
     for line in [l.strip() for l in ifp.readlines()]:
         if len(line) > 0:
             if algo is None:
-                algo = line
+                algo = list(map(lambda x: input_mapping[x], line))
             else:
-                image.append([x for x in line])
+                x = 0
+                for v in line:
+                    image[P(x,y)] = input_mapping[v]
+                    x += 1
+                y += 1
 
-print(len(algo))
 
-for i in range(2):
-    
-    current_image = []
-    current_image.append(['.' for x in range(8+len(image[0]))])
-    current_image.append(['.' for x in range(8+len(image[0]))])
-    current_image.append(['.' for x in range(8+len(image[0]))])
-    current_image.append(['.' for x in range(8+len(image[0]))])
-    for row in image:
-        current_image.append(['.'] * 4 + row +['.'] * 4)
-    current_image.append(['.' for x in range(8+len(image[0]))])
-    current_image.append(['.' for x in range(8+len(image[0]))])
-    current_image.append(['.' for x in range(8+len(image[0]))])
-    current_image.append(['.' for x in range(8+len(image[0]))])
+for iteration in range(50):
+    current_x = list(set(map(lambda x: x.x, image.keys())))
+    current_y = list(set(map(lambda x: x.y, image.keys())))
+    current_image_default = 0
 
-    new_image = [['.' for x in range(8+len(image[0]))]
-              for y in range(8+len(image))]
+    new_image = dict()
+    new_image_lit = 0
 
-    print(f'{len(image)} -> {len(new_image)}')
+    if algo[0] > 0 and algo[-1] < 1:
+        current_image_default = algo[0]
+        if not iteration % 2:
+            current_image_default = algo[-1]
+    # print(f'{1+iteration} {current_image_default}')
 
-    new_image = list()
-    for row in current_image:
-        new_image.append(['.'] * len(row))
+    for y in range(min(current_y)-2, max(current_y)+3):
+        for x in range(min(current_x)-2, max(current_x)+3):
+            algo_offset = 0
+            for dy in [ -1, 0, 1 ]:
+                for dx in [ -1, 0, 1 ]:
+                    ov = image.get(P(x+dx, y+dy), current_image_default)
+                    algo_offset <<= 1
+                    algo_offset += ov
+            nv = algo[algo_offset]
+            new_image[P(x,y)] = nv
+            new_image_lit += nv
 
-    print()
-    for row in current_image:
-        print(''.join(row))
-
-    print()
-    for row in new_image:
-        print(''.join(row))
-
-    lit_pixels = 0
-    print(range(1, len(current_image)-1))
-    for y in range(1, len(current_image)-1):
-        for x in range(1, len(current_image[y])-1):
-            thing = ""
-            for dy in [-1, 0, 1]:
-                thing += ''.join(current_image[y+dy][x-1:x+2])
-                # for dx in [-1, 0, 1]:
-                #     if y+dy >= 0 and y+dy < len(current_image) and x+dx >= 0 and x+dx < len(current_image[y]):
-                #         thing += current_image[y+dy][x+dx]
-                #     else:
-                #         thing += '.'
-
-            # print(thing)
-            # print(f'x:{x}, y:{y} - {thing}')
-            thing = int(thing.replace('#', '1').replace('.', '0'), 2)
-
-            # print(f'{x+1},{y+1} = {algo[thing]}')
-            npx = algo[thing]
-            if npx == '#':
-                lit_pixels += 1
-            new_image[y][x] = npx
-
-    print()
-    for row in new_image:
-        print(''.join(row))
-    print(lit_pixels)
+    # print_image(new_image)
+    if iteration in [ 1, 49 ]:
+        print(f'{1+iteration} {new_image_lit}')
 
     image = new_image
+
