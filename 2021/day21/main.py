@@ -1,4 +1,5 @@
 from typing import List
+import functools
 
 
 class Player:
@@ -47,9 +48,35 @@ class Game1:
         return self.d.count * self.loser.score
 
 
-# p1 = Player("1", 4)
-# p2 = Player("2", 8)
-p1 = Player("1", 10)
-p2 = Player("2", 6)
-g1 = Game1([p1, p2])
+class Game2:
+
+    def __init__(self, players: List[Player], winscore: int = 21):
+        self.players = players
+        self.winscore = winscore
+
+    @staticmethod
+    @functools.cache
+    def run_game(p0p, p0s, p1p, p1s, winscore):
+        w0, w1 = 0, 0
+        for roll in [(x, y, z) for x in [1, 2, 3] for y in [1, 2, 3] for z in [1, 2, 3]]:
+            tp0p = (p0p + sum(roll)) % 10
+            tp0s = (p0s+tp0p+1)
+            if tp0s < 21:
+                nw1, nw0 = Game2.run_game(p1p, p1s, tp0p, tp0s, winscore)
+                w0, w1 = w0+nw0, w1+nw1
+            else:
+                w0 += 1
+        return w0, w1
+
+    def result(self):
+        return max(Game2.run_game(self.players[0].startpos, 0, self.players[1].startpos, 0, self.winscore))
+
+
+# players = [Player("1", 4), Player("2", 8)]
+players = [Player("1", 10), Player("2", 6)]
+g1 = Game1(players)
 print(g1.result())
+
+players = [Player("1", 10), Player("2", 6)]
+g2 = Game2(players)
+print(g2.result())
