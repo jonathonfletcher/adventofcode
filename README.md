@@ -1,5 +1,11 @@
 # Advent of Code
 
+## Advent of Code 2024
+
+See [Advent of Code 2024](https://adventofcode.com/2024)
+
+No specific language this year.
+
 ## Advent of Code 2021
 
 See [Advent of Code 2021](https://adventofcode.com/2021)
