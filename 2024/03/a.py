@@ -11,7 +11,6 @@ a_sum = 0
 b_sum = 0
 dd = True
 for line in input:
-    mul_list = list()
     while len(line) > 0:
         m: re.Match = re.search(all_ex, line)
         if not m:
