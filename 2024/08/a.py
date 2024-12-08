@@ -21,17 +21,16 @@ for y, row in enumerate(input):
 for c, l in antennas.items():
     for a1, a2 in itertools.permutations(l, 2):
         dx, dy = a2[0] - a1[0], a2[1] - a1[1]
-        nx, ny = a2[0] + dx, a2[1] + dy
 
+        nx, ny = a2
+        nx, ny = nx + dx, ny + dy
         if nx in range(maxx) and ny in range(maxy):
             antinodes.add((nx, ny))
 
-        for sp in a1, a2:
-            nx, ny = sp
-            while nx in range(maxx) and ny in range(maxy):
-                bantinodes.add((nx, ny))
-                nx = nx + dx
-                ny = ny + dy
+        nx, ny = a1
+        while nx in range(maxx) and ny in range(maxy):
+            bantinodes.add((nx, ny))
+            nx, ny = nx + dx, ny + dy
 
 
 a = len(antinodes)
