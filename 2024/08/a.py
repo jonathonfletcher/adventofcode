@@ -27,7 +27,7 @@ for c, l in antennas.items():
         if nx in range(maxx) and ny in range(maxy):
             antinodes.add((nx, ny))
 
-        nx, ny = a1
+        nx, ny = a2
         while nx in range(maxx) and ny in range(maxy):
             bantinodes.add((nx, ny))
             nx, ny = nx + dx, ny + dy
