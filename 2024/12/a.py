@@ -13,6 +13,12 @@ for y, row in enumerate(input):
 
 
 neighbours = [(-1, 0), (0, -1), (1, 0), (0, 1)]
+corners = {
+    (-1, -1): {(-1, 0), (0, -1)},
+    (-1, 1): {(-1, 0), (0, 1)},
+    (1, -1): {(1, 0), (0, -1)},
+    (1, 1): {(1, 0), (0, 1)},
+}
 
 plotcounter = itertools.count()
 region_topology = collections.defaultdict(lambda: -1)
@@ -43,14 +49,8 @@ for sxy, st in input_topology.items():
                 outsides.add((dx, dy))
                 pp += 1
 
-        ocorners = {
-            (-1, -1): {(-1, 0), (0, -1)},
-            (-1, 1): {(-1, 0), (0, 1)},
-            (1, -1): {(1, 0), (0, -1)},
-            (1, 1): {(1, 0), (0, 1)},
-        }
         insides = set(neighbours).difference(outsides)
-        for c, e in ocorners.items():
+        for c, e in corners.items():
             if outsides.intersection(e) == e:
                 pc += 1
             if insides.intersection(e) == e:
