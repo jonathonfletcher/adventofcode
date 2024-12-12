@@ -10,3 +10,4 @@ Cargo.lock
 **/*.rs.bk
 python-*-env
 .vscode/
+**/*.txt
