@@ -23,32 +23,16 @@ with open(os.path.join(os.path.dirname(__file__), 'input.txt')) as ifp:
     input.append(machine)
 
 
+def paper(ax, ay, bx, by, px, py):
+    nb = ((ax * py) - (ay * px)) / ((ax * by) - (ay * bx))
+    if int(nb) != nb:
+        return 0
 
-def argh(ax, ay, bx, by, px, py):
+    na = (px - (bx * nb)) / ax
+    if int(na) != na:
+        return 0
 
-    #  ax * na + bx * nb == px
-    #  ay * na + by * nb == py
-    #
-    #  https://www.wolframalpha.com
-    #  A1 * x + A2 * y = A3, B1 * x + B2 * y = B3, A1 > 0, A2 > 0, A3 > 0, B1 > 0, B2 > 0, B3 > 0
-    #
-    #  x = na
-    #  y = nb
-    #  A1 = ax
-    #  A2 = bx
-    #  A3 = px
-    #  B1 = ay
-    #  B2 = by
-    #  B3 = py
-
-    common_divisor = (bx * ay) - (ax * by)
-    x = ((bx * py) - (px * by)) / common_divisor
-    y = ((px * ay) - (ax * py)) / common_divisor
-
-    if all([int(x) == x, int(y) == y]):
-        return 3 * int(x) + int(y)
-
-    return 0
+    return 3 * int(na) + int(nb)
 
 
 # @functools.cache
@@ -78,8 +62,8 @@ for machine in input:
     #         break
     # cost = max(0, cost)
 
-    a += argh(ax, ay, bx, by, px, py)
-    b += argh(ax, ay, bx, by, px + error, py + error)
+    a += paper(ax, ay, bx, by, px, py)
+    b += paper(ax, ay, bx, by, px + error, py + error)
 
 
 print(f'{a=}')
