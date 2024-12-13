@@ -24,15 +24,44 @@ with open(os.path.join(os.path.dirname(__file__), 'input.txt')) as ifp:
 
 
 
-@functools.cache
-def xyf(ax, ay, bx, by, px, py, na, nb, /):
-    return all([
-        ax * na + bx * nb == px,
-        ay * na + by * nb == py,
-    ])
+def argh(ax, ay, bx, by, px, py):
+
+    #  ax * na + bx * nb == px
+    #  ay * na + by * nb == py
+    #
+    #  https://www.wolframalpha.com
+    #  A1 * x + A2 * y = A3, B1 * x + B2 * y = B3, A1 > 0, A2 > 0, A3 > 0, B1 > 0, B2 > 0, B3 > 0
+    #
+    #  x = na
+    #  y = nb
+    #  A1 = ax
+    #  A2 = bx
+    #  A3 = px
+    #  B1 = ay
+    #  B2 = by
+    #  B3 = py
+
+    common_divisor = (bx * ay) - (ax * by)
+    x = ((bx * py) - (px * by)) / common_divisor
+    y = ((px * ay) - (ax * py)) / common_divisor
+
+    if all([int(x) == x, int(y) == y]):
+        return 3 * int(x) + int(y)
+
+    return 0
+
+
+# @functools.cache
+# def xyf(ax, ay, bx, by, px, py, na, nb, /):
+#     return all([
+#         ax * na + bx * nb == px,
+#         ay * na + by * nb == py,
+#     ])
 
 
 a = 0
+b = 0
+error = 10000000000000
 for machine in input:
     button_a = machine['A']
     button_b = machine['B']
@@ -41,18 +70,18 @@ for machine in input:
     ax, bx, px = button_a[0], button_b[0], prize[0]
     ay, by, py = button_a[1], button_b[1], prize[1]
 
-    machinef = functools.partial(xyf, ax, ay, bx, by, px, py)
+    # cost = -1
+    # machinef = functools.partial(xyf, ax, ay, bx, by, px, py)
+    # for na, nb in itertools.product(range(100), range(100)):
+    #     if machinef(na, nb):
+    #         cost = na * 3 + nb
+    #         break
+    # cost = max(0, cost)
 
-    cost = -1
-    for na, nb in itertools.product(range(100), range(100)):
-        if machinef(na, nb):
-            cost = na * 3 + nb
-            break
-
-    cost = max(0, cost)
-
-    a += cost
+    a += argh(ax, ay, bx, by, px, py)
+    b += argh(ax, ay, bx, by, px + error, py + error)
 
 
 print(f'{a=}')
+print(f'{b=}')
 pass
