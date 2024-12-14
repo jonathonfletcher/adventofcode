@@ -14,6 +14,15 @@ with open(os.path.join(os.path.dirname(__file__), 'input.txt')) as ifp:
         robots.append((p, v))
 
 
+shape = set()
+with open(os.path.join(os.path.dirname(__file__), 'shape.txt')) as ifp:
+    for y, row in enumerate(map(list, map(lambda x: str(x).strip(), ifp.readlines()))):
+        for x, c in enumerate(row):
+            if c == '#':
+                shape.add((x, y))
+pass
+
+
 def quarters(sx, sy, /):
     qx = sx // 2
     qy = sy // 2
@@ -89,12 +98,30 @@ def isbox(space, points):
     return all([maxx == maxy, nmaxx == nmaxy, maxx > 30, nmaxx == 2])
 
 
+def isshape(space, points, shape, /):
+    sx, sy = space
+    maxsx = 1 + max(map(lambda xy: xy[0], shape))
+    maxsy = 1 + max(map(lambda xy: xy[-1], shape))
+
+    for xo, yo in itertools.product(range(sx - maxsx), range(sy - maxsy)):
+        sn = 0
+        for ssx, ssy in shape:
+            if (ssx + xo, ssy + yo) in points:
+                sn += 1
+            else:
+                break
+        if sn == len(shape):
+            return True
+    return False
+
+
 def partb(space, robots, /):
     for seconds in itertools.count(1):
         nrobots = locations(space, robots, seconds)
         if isbox(space, nrobots.keys()):
-            print_space(space, nrobots.keys())
-            return seconds
+            if isshape(space, nrobots.keys(), shape):
+                print_space(space, nrobots.keys())
+                return seconds
     return -1
 
 
