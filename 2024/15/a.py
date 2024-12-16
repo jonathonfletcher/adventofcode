@@ -61,23 +61,28 @@ def push_bx(warehouse, robot, dx, /):
     def find_bx(warehouse, robot, dx, /):
         rx, ry = robot
         bx = rx + dx
-        while warehouse[(bx, ry)] not in ['#', '.']:
-            bx += dx
-        return warehouse[(bx, ry)] == '.', bx
+
+        if warehouse[(bx, ry)] == '.':
+            return {bx}, bx
+        elif warehouse[(bx, ry)] == '#':
+            return set(), bx
+        else:
+            return find_bx(warehouse, (bx, ry), dx)
 
     rx, ry = robot
-    fx, bx = find_bx(warehouse, robot, dx)
-    while fx and abs(rx - bx) > 1:
+    sx, bx = find_bx(warehouse, robot, dx)
+    while len(sx) > 0 and abs(rx - bx) > 1:
         t = warehouse[(bx, ry)]
         for i in range(2):
-            warehouse[(bx - i * dx, ry)] = warehouse[(bx - (i + 1) * dx, ry)]
-        warehouse[(bx - 2 * dx, ry)] = t
-        fx, bx = find_bx(warehouse, robot, dx)
+            warehouse[(bx, ry)] = warehouse[(bx - dx, ry)]
+            bx -= dx
+        warehouse[(bx, ry)] = t
+        sx, bx = find_bx(warehouse, robot, dx)
 
-    if fx:
+    if len(sx) > 0:
         rx += dx
 
-    return warehouse, (rx, ry), fx
+    return warehouse, (rx, ry), len(sx) > 0
 
 
 def push_by(warehouse, robot, dy, /):
@@ -170,7 +175,7 @@ def gps(warehouse):
 a_warehouse = warehouse.copy()
 a_robot = robot
 # print_warehouse(a_warehouse, a_robot)
-for step in path:
+for si, step in enumerate(path):
     a_warehouse, a_robot, a_push = move(a_warehouse, a_robot, step, push_a)
     # print(os.linesep)
     # print(f"Move {step}:")
