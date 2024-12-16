@@ -2,7 +2,7 @@ import os
 
 warehouse = dict()
 robot = None
-with open(os.path.join(os.path.dirname(__file__), 'test.txt')) as ifp:
+with open(os.path.join(os.path.dirname(__file__), 'input.txt')) as ifp:
     grid, path = ifp.read().split(os.linesep * 2)
     path = path.replace(os.linesep, '')
     for y, row in enumerate(grid.split(os.linesep)):
@@ -11,16 +11,6 @@ with open(os.path.join(os.path.dirname(__file__), 'test.txt')) as ifp:
                 robot = (x, y)
                 c = '.'
             warehouse[(x, y)] = c
-
-# verifyb = dict()
-# verifyrobot = None
-# with open(os.path.join(os.path.dirname(__file__), 'verify.txt')) as ifp:
-#     for y, row in enumerate(ifp.read().split()):
-#         for x, c in enumerate(row):
-#             if c == '@':
-#                 verifyrobot = (x, y)
-#                 c = '.'
-#             verifyb[(x, y)] = c
 
 
 def print_warehouse(warehouse, robot, /):
@@ -102,12 +92,24 @@ def push_by(warehouse, robot, dy, /):
             elif warehouse[(rx, by)] == ']':
                 nx = rx - 1
 
-            aax, aay = find_by(warehouse, (nx, by), dy)
-            bbx, bby = find_by(warehouse, (rx, by), dy)
+            nxs, nby = find_by(warehouse, (nx, by), dy)
+            rxs, rby = find_by(warehouse, (rx, by), dy)
+            pass
 
-            nnx = aax.union(bbx)
-            if len(nnx) > 0 and len(nnx) % 2 == 0 and aay == bby:
-                return nnx, aay
+            if nby == rby:
+                nnx = nxs.union(rxs)
+                if len(nnx) > 0 and len(nnx) % 2 == 0:
+                    return nnx, nby
+            elif dy > 0:
+                if nby > rby and len(nxs) > 0 and len(nxs) % 2 == 0:
+                    return nxs, nby
+                elif rby > nby and len(rxs) > 0 and len(rxs) % 2 == 0:
+                    return rxs, rby
+            elif dy < 0:
+                if nby < rby and len(nxs) > 0 and len(nxs) % 2 == 0:
+                    return nxs, nby
+                elif rby < nby and len(rxs) > 0 and len(rxs) % 2 == 0:
+                    return rxs, rby
 
             return set(), by
 
@@ -136,9 +138,12 @@ def push_b(warehouse, robot, dxy, /):
         barf()
 
 
-def move(warehouse, robot, step, pushf, /):
+def move(si, warehouse, robot, step, pushf, /):
     mmap = {'v': (0, 1), '^': (0, -1), '<': (-1, 0), '>': (1, 0)}
     rdx, rdy = mmap[step]
+
+    if si == 312:
+        pass
 
     rx, ry = robot
     nrx, nry = rx + rdx, ry + rdy
@@ -167,8 +172,7 @@ def gps(warehouse):
     v = 0
     for (x, y), c in warehouse.items():
         if c in ['O', '[']:
-            s = 100 * y + x
-            v += s
+            v += 100 * y + x
     return v
 
 
@@ -176,7 +180,7 @@ a_warehouse = warehouse.copy()
 a_robot = robot
 # print_warehouse(a_warehouse, a_robot)
 for si, step in enumerate(path):
-    a_warehouse, a_robot, a_push = move(a_warehouse, a_robot, step, push_a)
+    a_warehouse, a_robot, a_push = move(si, a_warehouse, a_robot, step, push_a)
     # print(os.linesep)
     # print(f"Move {step}:")
     # print_warehouse(a_warehouse, a_robot)
@@ -186,19 +190,13 @@ print(f"{a=}")
 
 
 b_warehouse, b_robot = make_b(warehouse, robot)
-# if b_warehouse != verifyb or b_robot != verifyrobot:
-#     pass
-print_warehouse(b_warehouse, b_robot)
+# print_warehouse(b_warehouse, b_robot)
 for si, step in enumerate(path):
-    print(os.linesep)
-    print(f"Move {step}:")
-    save_b_robot = b_robot
-    b_warehouse, b_robot, b_push = move(b_warehouse, b_robot, step, push_b)
-    print((save_b_robot, b_robot))
-    print_warehouse(b_warehouse, b_robot)
-    pass
-    if b_push:
-        pass
+    b_warehouse, b_robot, b_push = move(si, b_warehouse, b_robot, step, push_b)
+    # print(os.linesep)
+    # print(f"Move {step}:")
+    # print_warehouse(b_warehouse, b_robot)
 b = gps(b_warehouse)
 print(f"{b=}")
+
 pass
