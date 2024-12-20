@@ -84,7 +84,7 @@ def valid_xy(dxy, pxy, trackdict, /):
         ni = trackdict.get(nxy, 0)
         if ni <= pi:
             continue
-        yield nxy, ni
+        yield ni, nxy
 
 
 # printgrid(grid, list())
@@ -104,7 +104,7 @@ for d in sorted(distances.keys()):
 
     for pi, pxy in enumerate(track):
 
-        for (nxy, ni) in valid_xy(distances[d], pxy, trackdict):
+        for ni, nxy in valid_xy(distances[d], pxy, trackdict):
 
             s = ni - pi - d
             if s < 100:
