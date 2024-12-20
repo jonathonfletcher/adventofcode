@@ -59,9 +59,36 @@ def dijkstra(grid, spos, epos, /, cxy=None):
     return sys.maxsize, list()
 
 
+def make_distances(maxjumps, /):
+    distances = collections.defaultdict(set)
+    mindy = -maxjumps
+    maxdy = maxjumps + 1
+    for dy in range(mindy, maxdy):
+        ady = abs(dy)
+
+        mindx = mindy + ady
+        maxdx = maxdy - ady
+        for dx in range(mindx, maxdx):
+            adx = abs(dx)
+            if ady + adx > 1:
+                distances[ady + adx].add((dx, dy))
+
+    return distances
+
+
+def valid_xy(dxy, pxy, trackdict, /):
+    px, py = pxy
+    pi = trackdict.get(pxy, 0)
+    for (dx, dy) in dxy:
+        nxy = px + dx, py + dy
+        ni = trackdict.get(nxy, 0)
+        if ni <= pi:
+            continue
+        yield nxy, ni
+
+
 # printgrid(grid, list())
 _, track = dijkstra(grid, spos, epos)
-
 
 trackdict = dict()
 for pi, pxy in enumerate(track):
@@ -71,27 +98,14 @@ for pi, pxy in enumerate(track):
 a = 0
 b = 0
 maxjumps = 20
-for pi, (px, py) in enumerate(track):
+distances = make_distances(maxjumps)
 
-    if all([pi > 0, pi % 100 == 0]):
-        print(f"{100. * pi / len(track):2.0f}%")
+for d in sorted(distances.keys()):
 
-    mindy = -maxjumps
-    maxdy = maxjumps + 1
-    for dy in range(mindy, maxdy):
-        ady = abs(dy)
+    for pi, pxy in enumerate(track):
 
-        mindx = -maxjumps + ady
-        maxdx = maxjumps + 1 - ady
-        for dx in range(mindx, maxdx):
-            adx = abs(dx)
+        for (nxy, ni) in valid_xy(distances[d], pxy, trackdict):
 
-            nxy = px + dx, py + dy
-            ni = trackdict.get(nxy, 0)
-            if ni <= pi:
-                continue
-
-            d = ady + adx
             s = ni - pi - d
             if s < 100:
                 continue
@@ -100,6 +114,8 @@ for pi, (px, py) in enumerate(track):
             if d == 2:
                 a += 1
 
-print(f"{a=}")
+    if d == 2:
+        print(f"{a=}")
+
 print(f"{b=}")
 pass
