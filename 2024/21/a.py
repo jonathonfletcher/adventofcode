@@ -26,43 +26,32 @@ DIRPAD = {
 }
 
 
-def make_dirpadpath(path, /):
-    dmap = {
-        'A': (0, 0),
+def dirpath_dijkstra(grid, spos, epos, /):
+    q = list()
+    distance = collections.defaultdict(lambda: sys.maxsize)
+    bestpaths = list()
+    bestscore = sys.maxsize
+
+    dirmap = {
         '>': (1, 0),
         '<': (-1, 0),
         '^': (0, -1),
         'v': (0, 1)
     }
-    dmap = {v: k for k, v in dmap.items()}
-    dpath = str()
-    for (x0, y0), (x1, y1) in itertools.pairwise(path):
-        dxy = (x1 - x0, y1 - y0)
-        dpath += dmap[dxy]
-    return dpath
 
-
-@functools.cache
-def dirpath_dijkstra(grid, spos, epos, /):
-    q = list()
-    distance = collections.defaultdict(lambda: sys.maxsize)
-    # bestpaths = list()
-    bestscore = sys.maxsize
-
-    heapq.heappush(q, [0, [spos], spos, (0, 0)])
+    heapq.heappush(q, [0, "", spos, (0, 0)])
     while len(q) > 0:
         score, path, xy, dxy = heapq.heappop(q)
 
         if xy == epos:
             if score <= bestscore:
                 bestscore = score
-                # bestpaths.append(make_dirpadpath(path))
-                yield make_dirpadpath(path)
+                bestpaths.append(path)
             else:
                 break
 
         x, y = xy
-        for (dx, dy) in [[1, 0], [-1, 0], [0, 1], [0, -1]]:
+        for v, (dx, dy) in dirmap.items():
             nxy = x + dx, y + dy
             if nxy not in grid:
                 continue
@@ -75,30 +64,9 @@ def dirpath_dijkstra(grid, spos, epos, /):
 
             if nscore <= distance[(nxy, ndxy)]:
                 distance[(nxy, ndxy)] = nscore
-                heapq.heappush(q, [nscore, path + [nxy], nxy, ndxy])
+                heapq.heappush(q, [nscore, path + v, nxy, ndxy])
 
-    # return bestpaths
-
-
-@functools.cache
-def dirpath_str_counter(line, n, /):
-    if n == 0:
-        return line
-
-    r = ""
-    global DIRPAD
-    line = 'A' + line
-    for skey, ekey in itertools.pairwise(line):
-        shortest = None
-        for dirpadpath in dirpath_dijkstra(DIRPAD.values(), DIRPAD[skey], DIRPAD[ekey]):
-            pr = dirpath_str_counter(dirpadpath + 'A', n - 1)
-            if shortest is None:
-                shortest = pr
-            elif len(pr) < len(shortest):
-                shortest = pr
-        if shortest is not None:
-            r += shortest
-    return r
+    return bestpaths
 
 
 @functools.cache
@@ -108,8 +76,7 @@ def dirpath_len_counter(line, n, /):
 
     r = 0
     global DIRPAD
-    line = 'A' + line
-    for skey, ekey in itertools.pairwise(line):
+    for skey, ekey in itertools.pairwise('A' + line):
         shortest = sys.maxsize
         for dirpadpath in dirpath_dijkstra(DIRPAD.values(), DIRPAD[skey], DIRPAD[ekey]):
             prlen = dirpath_len_counter(dirpadpath + 'A', n - 1)
@@ -119,28 +86,11 @@ def dirpath_len_counter(line, n, /):
     return r
 
 
-def keypad_str_counter(line, n, /):
-    r = ""
-    global KEYPAD
-    line = 'A' + line
-    for skey, ekey in itertools.pairwise(line):
-        shortest = None
-        for dirpadpath in dirpath_dijkstra(KEYPAD.values(), KEYPAD[skey], KEYPAD[ekey]):
-            pr = dirpath_str_counter(dirpadpath + 'A', n)
-            if shortest is None:
-                shortest = pr
-            elif len(pr) < len(shortest):
-                shortest = pr
-        if shortest is not None:
-            r += shortest
-    return r
-
-
 def keypad_len_counter(line, n, /):
+
     r = 0
     global KEYPAD
-    line = 'A' + line
-    for skey, ekey in itertools.pairwise(line):
+    for skey, ekey in itertools.pairwise('A' + line):
         shortest = sys.maxsize
         for dirpadpath in dirpath_dijkstra(KEYPAD.values(), KEYPAD[skey], KEYPAD[ekey]):
             prlen = dirpath_len_counter(dirpadpath + 'A', n)
@@ -153,16 +103,13 @@ def keypad_len_counter(line, n, /):
 a = 0
 for line in input:
     v = int(line[:-1])
-    arstr = len(keypad_str_counter(line, 2))
     ar = keypad_len_counter(line, 2)
-    assert ar == arstr
     a += ar * v
 print(f"{a=}")
 
 b = 0
 for line in input:
     v = int(line[:-1])
-    # brstr = len(keypad_str_counter(line, 25))
     br = keypad_len_counter(line, 25)
     b += br * v
 print(f"{b=}")
