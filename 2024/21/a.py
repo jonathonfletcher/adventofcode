@@ -26,7 +26,7 @@ DIRPAD = {
 }
 
 
-def dirpath_dijkstra(grid, spos, epos, /):
+def dirpad_dijkstra(grid, spos, epos, /):
     q = list()
     distance = collections.defaultdict(lambda: sys.maxsize)
     bestpaths = list()
@@ -70,7 +70,7 @@ def dirpath_dijkstra(grid, spos, epos, /):
 
 
 @functools.cache
-def dirpath_len_counter(line, n, /):
+def dirpad_len_counter(line, n, /):
     if n == 0:
         return len(line)
 
@@ -78,8 +78,8 @@ def dirpath_len_counter(line, n, /):
     global DIRPAD
     for skey, ekey in itertools.pairwise('A' + line):
         shortest = sys.maxsize
-        for dirpadpath in dirpath_dijkstra(DIRPAD.values(), DIRPAD[skey], DIRPAD[ekey]):
-            prlen = dirpath_len_counter(dirpadpath + 'A', n - 1)
+        for dirpadpath in dirpad_dijkstra(DIRPAD.values(), DIRPAD[skey], DIRPAD[ekey]):
+            prlen = dirpad_len_counter(dirpadpath + 'A', n - 1)
             shortest = min(prlen, shortest)
         if shortest < sys.maxsize:
             r += shortest
@@ -92,8 +92,8 @@ def keypad_len_counter(line, n, /):
     global KEYPAD
     for skey, ekey in itertools.pairwise('A' + line):
         shortest = sys.maxsize
-        for dirpadpath in dirpath_dijkstra(KEYPAD.values(), KEYPAD[skey], KEYPAD[ekey]):
-            prlen = dirpath_len_counter(dirpadpath + 'A', n)
+        for dirpadpath in dirpad_dijkstra(KEYPAD.values(), KEYPAD[skey], KEYPAD[ekey]):
+            prlen = dirpad_len_counter(dirpadpath + 'A', n)
             shortest = min(prlen, shortest)
         if shortest < sys.maxsize:
             r += shortest
