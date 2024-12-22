@@ -29,7 +29,6 @@ class SN:
         self.secret = secret
         self.px = secret % 10
         self.pdpxq = list()
-        self.q = list()
         self.seenseq = set()
         self.sequences = collections.defaultdict(set)
         pass
@@ -56,16 +55,13 @@ class SN:
             self.pdpxq = self.pdpxq[1:]
 
         seq = None
-        firstseq = False
         if len(self.pdpxq) >= 5:
             seq = tuple(self.pdpxq[1:])
             if seq not in self.seenseq:
-                firstseq = True
                 self.seenseq.add(seq)
                 self.sequences[px].add(seq)
-
-        if not firstseq:
-            seq = None
+            else:
+                seq = None
 
         return self.iterations, self.secret, self.px, seq
 
