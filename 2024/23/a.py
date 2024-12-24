@@ -10,8 +10,10 @@ with open(os.path.join(os.path.dirname(__file__), 'input.txt')) as ifp:
             input[a].add(b)
             input[b].add(a)
 
+input = {k: frozenset(v.union({k})) for k, v in input.items()}
 
-def combinations(input: dict, length: int, /) -> list:
+
+def combinations(input: dict, length: int, /) -> frozenset:
     found = set()
     for k in itertools.combinations(input.keys(), length):
         ok = True
@@ -24,30 +26,33 @@ def combinations(input: dict, length: int, /) -> list:
             if not ok:
                 break
         if ok:
+            k = frozenset(k)
             if k not in found:
                 found.add(k)
-    return list(found)
+    return frozenset(found)
 
 
-def findlongest(input: dict, ili: int, iri: int, /):
-    li, ri = ili, iri
-    while li < ri:
-        mi = (li + ri) // 2
-        print(f"{mi}")
-        f = combinations(input, mi)
-        print(f"{mi} -> {len(f)}")
-        if len(f) > 0:
-            li = mi + 1
+def findlongest(sv: frozenset, ss: frozenset, ds: frozenset, prefix: frozenset) -> tuple[int, frozenset]:
+
+    if len(prefix) > len(sv):
+        return -1, prefix
+
+    ml, mp = len(prefix), prefix
+    for ssk in frozenset(ss.difference(ds).difference(prefix)):
+        newprefix = frozenset(prefix).union({ssk})
+        newsv = frozenset({svx for svx in sv if set(newprefix).issubset(svx)})
+
+        rl, rp = findlongest(newsv, ss, ds, newprefix)
+        if rl > ml:
+            ml, mp = rl, rp
         else:
-            ri = mi - 1
-        pass
-    return mi - 1
+            ds = frozenset(ds.union({ssk}))
+
+    return ml, mp
 
 
 a = 0
-af = combinations(input, 3)
-print(f"{len(af)=}")
-for c in af:
+for c in combinations(input, 3):
     for i in c:
         if i[0] == 't':
             a += 1
@@ -55,19 +60,12 @@ for c in af:
 print(f"{a=}")
 
 
-# # longest = findlongest(input, 3, 15)
-# counters = collections.defaultdict(int)
-# for k in input.keys():
-#     for v in input.values():
-#         if k in v:
-#             counters[k] += 1
-# maxcounter = max(counters.values())
-
-
-# f = combinations(input, maxcounter)
-# if len(f) == 1:
-#     b = ','.join(sorted(f[0]))
-
-# print(f"{b=}")
+b = frozenset()
+for k, v in input.items():
+    sv = frozenset({svx for svx in input.values() if k in svx})
+    rl, rp = findlongest(sv, v, set(), {k})
+    if len(rp) > len(b):
+        b = frozenset(rp)
+print(f"b={','.join(sorted(b))}")
 
 pass
